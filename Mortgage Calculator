@@ -1,1 +1,39 @@
-
+rint("++++++___( Mortgage Calculator )___++++++")
+#Input
+principal = float(input("Mortgage Amount:"))
+annual_interest_rate = float(input("Enter the interest rate:"))
+years = int(input("Enter years of the Mortgage"))
+extra_payment = float(input("Enter extra monthly payment(0 if none): "))
+r = annual_interest_rate / 1200
+n = years * 12
+#Formula Calculate Monthly PMT
+monthly_payment = round(principal * ((r*(1+r)**n) / ((1+r)**n-1)), 2) + extra_payment
+print(f"Monthly PMT is: ${monthly_payment:.2f}")
+import os
+import numpy as np
+import pandas as pd
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+pd.set_option('display.width', 150)
+# amortization table creation
+outstanding_principal = principal
+data = []  # List
+for i in range(1, n + 1):
+    interest_paid = round(outstanding_principal * r, 2)
+    principal_paid = round(monthly_payment - interest_paid, 2)
+    if principal_paid > outstanding_principal:
+        principal_paid = outstanding_principal
+    outstanding_principal = round(outstanding_principal - principal_paid, 2)  # Update loan balance
+    outstanding_principal = max(outstanding_principal, 0)
+    # (PV) of the payment
+    present_value = round(monthly_payment / ((1 + r) ** i), 2)
+    # Store data
+    data.append([i, monthly_payment, interest_paid, principal_paid, outstanding_principal, present_value])
+    if outstanding_principal <= 0:
+        break
+    # list
+df = pd.DataFrame(data, columns=["-Payment #", "-Payment:", "-Interest Paid:", "-Principal Paid:", "-Outstanding Principal:",
+                                     "-PV of Payment:"])
+print(df.head(360))  # Shows n rows
+df.to_excel("Mortgage_Schedule.xlsx", index=False, engine="openpyxl")
+os.startfile("Mortgage_Schedule.xlsx")
